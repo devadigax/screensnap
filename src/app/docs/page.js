@@ -52,8 +52,8 @@ export default function Docs() {
             <h3 className="mb-4" style={{ fontSize: '1.2rem', fontWeight: '600' }}>Terminal Example</h3>
             <div className="mb-6">
               <pre className="glass" style={{ padding: '1.5rem', overflowX: 'auto', borderRadius: '8px', background: 'rgba(0,0,0,0.2)' }}>
-                <code style={{ fontFamily: 'monospace', color: '#e2e8f0' }}>
-{`curl "http://localhost:3000/api/screenshot?url=google.com" -o test.jpg`}
+                <code>
+{`curl "https://screensnap.netlify.app/api/screenshot?url=google.com" -o test.jpg`}
                 </code>
               </pre>
             </div>
