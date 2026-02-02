@@ -54,7 +54,7 @@ export default function Home() {
       {/* Sidebar */}
       <aside className="sidebar glass">
         <div>
-          <Link href="/" className="logo"><span>WebSnap.</span></Link>
+          <Link href="/" className="logo"><span>ScreenSnap.</span></Link>
           <div className="sidebar-links mt-4">
             <div className="nav-section-label">Tools</div>
             <Link href="/" className="active">Screenshot Tool</Link>
