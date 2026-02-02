@@ -39,7 +39,7 @@ export default function Docs() {
             
             <h2 className="mb-4" style={{ fontSize: '1.5rem', fontWeight: '600' }}>Quick Start</h2>
             <p className="text-muted mb-4">
-              Send a GET request with the target URL to receive a JPEG image.
+              Send a GET request with the target URL to receive a high-quality JPEG image (1920x1080).
             </p>
 
             <div className="form-group mb-6">
@@ -49,14 +49,55 @@ export default function Docs() {
               </div>
             </div>
 
+            <h3 className="mb-4" style={{ fontSize: '1.2rem', fontWeight: '600' }}>Smart Waiting (Built-in)</h3>
+            <p className="text-muted mb-4" style={{ lineHeight: '1.6' }}>
+              The API automatically waits for the <strong>Network Idle</strong> event. This means it intelligently pauses 
+              until the website has finished loading its assets (images, fonts, scripts) before taking the snap. 
+              <br/>
+              <em>Note: There is a hard timeout of 8.5 seconds to prevent crashes on serverless functions.</em>
+            </p>
+
+            <h3 className="mb-4" style={{ fontSize: '1.2rem', fontWeight: '600' }}>Avoiding Cached Images</h3>
+            <p className="text-muted mb-4">
+              To ensure you always get a fresh screenshot (and not a cached version from a CDN), append a unique timestamp 
+              parameter (like <code>&t=...</code>) to your request.
+            </p>
+
             <h3 className="mb-4" style={{ fontSize: '1.2rem', fontWeight: '600' }}>Terminal Example</h3>
             <div className="mb-6">
               <pre className="glass" style={{ padding: '1.5rem', overflowX: 'auto', borderRadius: '8px', background: 'rgba(0,0,0,0.2)' }}>
                 <code>
-{`curl "https://screensnap.netlify.app/api/screenshot?url=google.com" -o test.jpg`}
+{`# Basic Request
+curl "https://screensnap.netlify.app/api/screenshot?url=google.com" -o test.jpg
+
+# Force Fresh Capture (Recommended)
+curl "https://screensnap.netlify.app/api/screenshot?url=google.com&t=$(date +%s)" -o fresh.jpg`}
                 </code>
               </pre>
             </div>
+
+            <h3 className="mb-4" style={{ fontSize: '1.2rem', fontWeight: '600' }}>PHP Integration</h3>
+            <p className="text-muted mb-4">
+              Example using cURL in PHP to save the image locally.
+            </p>
+            <div className="mb-6">
+              <pre className="glass" style={{ padding: '1.5rem', overflowX: 'auto', borderRadius: '8px', background: 'rgba(0,0,0,0.2)' }}>
+                <code style={{ fontSize: '0.9rem' }}>
+{`$url = "https://example.com";
+$api = "https://screensnap.netlify.app/api/screenshot?url=" . urlencode($url) . "&t=" . time();
+
+$ch = curl_init($api);
+$fp = fopen("screenshot.jpg", "wb");
+curl_setopt($ch, CURLOPT_FILE, $fp);
+curl_setopt($ch, CURLOPT_HEADER, 0);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+curl_exec($ch);
+curl_close($ch);
+fclose($fp);`}
+                </code>
+              </pre>
+            </div>
+
           </div>
         </div>
       </main>

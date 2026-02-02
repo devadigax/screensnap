@@ -12,15 +12,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "WebSnap - Website Screenshot Tool",
+  title: "Screensnap - Website Screenshot Tool",
   description: "Generate high-quality website screenshots instantly.",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      {/* Add suppressHydrationWarning={true} to the body */}
-      <body suppressHydrationWarning={true}>
+      {/* FIX: Added the font variables to className. 
+          Without this, the fonts defined above are never applied.
+      */}
+      <body 
+        className={`${geistSans.variable} ${geistMono.variable}`}
+        suppressHydrationWarning={true}
+      >
         {children}
       </body>
     </html>
