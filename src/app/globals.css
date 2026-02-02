@@ -1,0 +1,146 @@
+/* src/app/globals.css */
+
+/* 1. RESET & FONTS */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* 2. VARIABLES (THEMING) */
+:root {
+  --bg-color: #f0f2f5;
+  --text-color: #1a1a1a;
+  --text-muted: #64748b;
+  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05);
+  --accent: #6366f1;
+  --accent-hover: #4f46e5;
+  --blob-1: #ff9a9e;
+  --blob-2: #fad0c4;
+  --sidebar-width: 240px;
+}
+
+[data-theme="dark"] {
+  --bg-color: #0f172a;
+  --text-color: #e2e8f0;
+  --text-muted: #94a3b8;
+  --glass-bg: rgba(30, 41, 59, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
+  --accent: #818cf8;
+  --accent-hover: #6366f1;
+  --blob-1: #4338ca;
+  --blob-2: #3b82f6;
+}
+
+/* 3. CORE STYLES */
+body {
+  font-family: 'Outfit', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 4. ANIMATED BACKGROUNDS */
+.background-blobs {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  z-index: -1; overflow: hidden; pointer-events: none;
+}
+.blob {
+  position: absolute; filter: blur(90px); opacity: 0.5;
+  animation: float 12s infinite ease-in-out alternate;
+}
+.blob-1 { top: -10%; left: -10%; width: 400px; height: 400px; background: var(--blob-1); border-radius: 40% 50% 30% 40%; }
+.blob-2 { bottom: -10%; right: -10%; width: 500px; height: 500px; background: var(--blob-2); border-radius: 60% 40% 30% 50%; animation-delay: -5s; }
+
+@keyframes float {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  100% { transform: translate(30px, 40px) rotate(8deg); }
+}
+
+/* 5. UTILITIES */
+.glass {
+  background: var(--glass-bg); backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border); border-radius: 12px;
+  box-shadow: var(--glass-shadow);
+}
+.text-muted { color: var(--text-muted) !important; }
+.mb-4 { margin-bottom: 1.5rem !important; }
+.mt-4 { margin-top: 1.5rem !important; }
+
+/* 6. LAYOUT & SIDEBAR */
+.dashboard-layout { display: flex; min-height: 100vh; }
+
+.sidebar {
+  position: fixed; top: 1.5rem; left: 1.5rem; bottom: 1.5rem;
+  width: var(--sidebar-width); padding: 1.5rem;
+  display: flex; flex-direction: column; justify-content: space-between;
+  z-index: 100;
+}
+.sidebar .logo { font-size: 1.5rem; font-weight: 800; color: var(--accent); text-decoration: none; }
+.sidebar-links { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 2rem; }
+.sidebar-links a {
+  text-decoration: none; color: var(--text-color); padding: 0.5rem 1rem;
+  border-radius: 8px; font-weight: 500; transition: all 0.2s;
+}
+.sidebar-links a.active, .sidebar-links a:hover { background: rgba(255,255,255,0.15); color: var(--accent); }
+.nav-section-label { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); margin: 1rem 0 0.5rem 1rem; font-weight: 600; }
+.theme-toggle {
+  background: transparent; border: 1px solid var(--glass-border); color: var(--text-color);
+  padding: 0.6rem; border-radius: 8px; cursor: pointer; width: 100%; transition: all 0.2s;
+}
+.theme-toggle:hover { background: rgba(255,255,255,0.1); }
+
+.main-content {
+  margin-left: calc(var(--sidebar-width) + 3rem); flex: 1;
+  padding: 1.5rem 1.5rem 1.5rem 0; width: calc(100% - var(--sidebar-width) - 3rem);
+}
+
+/* 7. UI ELEMENTS (Header, Forms, Buttons) */
+.tool-header-card {
+  padding: 2.5rem; margin-bottom: 1rem;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  border-radius: 16px; box-shadow: var(--glass-shadow);
+}
+.card-title { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+.card-desc { color: var(--text-muted); }
+
+.tool-grid-layout { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+.content-box { padding: 2rem; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 16px; }
+
+.form-group { margin-bottom: 1rem; }
+.form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+.form-control {
+  width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(198,198,198,0.33);
+  color: var(--text-color); padding: 0.75rem 1rem; border-radius: 8px; transition: all 0.2s;
+}
+.form-control:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+
+.input-group { position: relative; }
+.input-group .input-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 1.2rem; opacity: 0.7; }
+.input-group .form-control { padding-left: 44px; }
+
+.btn {
+  cursor: pointer; border: none; font-weight: 600; border-radius: 8px;
+  padding: 0.75rem 1.5rem; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center;
+}
+.btn-primary { background: var(--accent); color: white; box-shadow: 0 4px 12px rgba(99,102,241,0.25); }
+.btn-primary:hover:not(:disabled) { background: var(--accent-hover); transform: translateY(-1px); }
+.btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+/* 8. ALERTS & RESULT */
+.alert { padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border: 1px solid transparent; }
+.alert-error { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: rgba(239, 68, 68, 0.2); }
+
+/* 9. LOADER & RESPONSIVE */
+.loader {
+  border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid white;
+  border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main-content { margin-left: 0; width: 100%; padding: 1rem; }
+}
