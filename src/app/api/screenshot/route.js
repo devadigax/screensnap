@@ -1,7 +1,6 @@
 import chromium from '@sparticuz/chromium';
 import puppeteer from 'puppeteer-core';
 
-// Helper to find local Chrome on Windows/Mac
 const getLocalExecutablePath = () => {
   if (process.platform === 'win32') {
     return 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
@@ -14,6 +13,7 @@ const getLocalExecutablePath = () => {
 async function captureScreenshot(url) {
   if (!url) throw new Error('URL is required');
   
+  // Ensure protocol
   const targetUrl = url.startsWith('http') ? url : `https://${url}`;
   
   const isDev = process.env.NODE_ENV === 'development';
@@ -23,9 +23,6 @@ async function captureScreenshot(url) {
     executablePath = getLocalExecutablePath();
     if (!executablePath) throw new Error("Local Chrome not found");
   } else {
-    // NETLIFY FIX:
-    // We pass a URL to 'executablePath'. This tells the library to download 
-    // the binary to /tmp at runtime, bypassing the "input directory" error.
     executablePath = await chromium.executablePath(
       "https://github.com/Sparticuz/chromium/releases/download/v123.0.1/chromium-v123.0.1-pack.tar"
     );
@@ -42,14 +39,18 @@ async function captureScreenshot(url) {
   try {
     const page = await browser.newPage();
     
-    // Set viewport
+    // Set 1080p viewport
     await page.setViewport({ width: 1920, height: 1080 });
-    
-    // Set User Agent to look like a real browser
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36');
     
-    // Timeout logic (Netlify has a 10s limit on free tier functions!)
-    await page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 8500 });
+    // --- SMART WAIT LOGIC ---
+    // 'networkidle2' = Wait until there are no more than 2 network connections for at least 500ms.
+    // This detects when the page is "visually ready" without waiting for every single background tracking script.
+    // We set a 20s timeout as a safety net.
+    await page.goto(targetUrl, { 
+        waitUntil: 'networkidle2', 
+        timeout: 20000 
+    });
     
     const buffer = await page.screenshot({ type: 'jpeg', quality: 80 });
     await browser.close();
@@ -61,17 +62,20 @@ async function captureScreenshot(url) {
   }
 }
 
-// GET Handler
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const url = searchParams.get('url');
+    
     const imageBuffer = await captureScreenshot(url);
 
     return new Response(imageBuffer, {
       headers: {
         'Content-Type': 'image/jpeg',
-        'Cache-Control': 'public, max-age=3600',
+        // CRITICAL: Force no caching so you never get a stale "Google" image
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
         'Access-Control-Allow-Origin': '*'
       },
     });
@@ -81,7 +85,6 @@ export async function GET(req) {
   }
 }
 
-// POST Handler
 export async function POST(req) {
   try {
     const body = await req.json();
