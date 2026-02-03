@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Screensnap - Website Screenshot Tool",
+  title: "ScreenSnap - Website Screenshot Tool",
   description: "Generate high-quality website screenshots instantly.",
 };
 

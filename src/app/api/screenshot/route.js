@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
 
-// Standard Chromium Path (will be set by Dockerfile)
-// If running locally on Mac/Windows, Puppeteer finds it automatically.
 const getExecutablePath = () => {
   return process.env.PUPPETEER_EXECUTABLE_PATH || undefined;
 };
@@ -12,10 +10,18 @@ async function captureScreenshot(url) {
   
   const targetUrl = url.startsWith('http') ? url : `https://${url}`;
 
-  // Launch Standard Chrome
-  // 'no-sandbox' is required for running inside Docker
   const browser = await puppeteer.launch({
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+    args: [
+      '--no-sandbox', 
+      '--disable-setuid-sandbox', 
+      '--disable-dev-shm-usage', // Critical for Docker/Render
+      '--disable-gpu',           // Save CPU/RAM
+      '--no-first-run',
+      '--no-zygote',
+      '--single-process',        // More stable on low-memory containers
+      '--hide-scrollbars',
+      '--mute-audio'
+    ],
     executablePath: getExecutablePath(),
     headless: 'new',
   });
@@ -23,26 +29,31 @@ async function captureScreenshot(url) {
   try {
     const page = await browser.newPage();
     
-    // Set 1080p Viewport
-    await page.setViewport({ width: 1920, height: 1080 });
+    // REDUCED RESOLUTION (720p)
+    // 1920x1080 is too heavy for Free Tier RAM (512MB)
+    await page.setViewport({ width: 1280, height: 720 });
     
-    // Set Standard User Agent to avoid bot detection
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36');
 
-    // --- SMART WAIT & TIMEOUT LOGIC ---
+    // --- SPEED OPTIMIZATION ---
     try {
-        // Attempt to wait for Network Idle (best quality)
-        // Timeout is set to 15 seconds. Render allows this (unlike Netlify).
+        // 'domcontentloaded' fires as soon as HTML is parsed. 
+        // Much faster than 'networkidle2'.
         await page.goto(targetUrl, { 
-            waitUntil: 'networkidle2', 
-            timeout: 15000 
+            waitUntil: 'domcontentloaded', 
+            timeout: 10000 
         });
+
+        // Optional: Small buffer to let critical images render
+        // This is safer/faster than waiting for ALL network traffic
+        await new Promise(r => setTimeout(r, 2000));
+
     } catch (e) {
-        // If 15s passes, don't crash. Just log it and take the photo anyway.
         console.log(`Timeout loading ${targetUrl}, taking partial screenshot.`);
     }
 
-    const buffer = await page.screenshot({ type: 'jpeg', quality: 80 });
+    // Lower quality (70) speeds up encoding and transfer
+    const buffer = await page.screenshot({ type: 'jpeg', quality: 70 });
     await browser.close();
     return buffer;
 
@@ -52,7 +63,6 @@ async function captureScreenshot(url) {
   }
 }
 
-// GET Handler
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
@@ -63,7 +73,7 @@ export async function GET(req) {
     return new Response(imageBuffer, {
       headers: {
         'Content-Type': 'image/jpeg',
-        'Cache-Control': 'no-cache, no-store, must-revalidate', // Prevent caching
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Access-Control-Allow-Origin': '*'
       },
     });
@@ -73,7 +83,6 @@ export async function GET(req) {
   }
 }
 
-// POST Handler
 export async function POST(req) {
   try {
     const body = await req.json();
